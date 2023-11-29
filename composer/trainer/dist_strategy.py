@@ -494,7 +494,13 @@ def prepare_fsdp_module(
 
                     _auto_wrap_policy = _auto_wrap_policy_old
 
-            fsdp_obj = FullyShardedDataParallel(
+            fsdp_obj = FullyShardedDataParallel(obj,
+                    auto_wrap_policy = torch.distributed.fsdp.wrap.size_based_auto_wrap_policy,
+                    device_id='hpu:' + str(torch.hpu.current_device()),
+                    use_orig_params=True,
+                    cpu_offload=torch.distributed.fsdp.fully_sharded_data_parallel.CPUOffload(offload_params=False)  # test cpu offload
+                    )
+            '''fsdp_obj = FullyShardedDataParallel(
                 obj,
                 sharding_strategy=sharding_strategy,
                 auto_wrap_policy=_auto_wrap_policy,  # type: ignore FSDP type bug
@@ -508,7 +514,7 @@ def prepare_fsdp_module(
                 forward_prefetch=forward_prefetch,
                 limit_all_gathers=limit_all_gathers,
                 **kwargs,
-            )
+            )'''
 
             if hasattr(fsdp_obj, '_exec_order_data'):
                 if hasattr(fsdp_obj._exec_order_data, '_forward_prefetch_limit'):
